@@ -7,7 +7,7 @@ async function sandbox (eshop = 'https://www.dedicatedbrand.com/en/men/news') {
 
     const products = await dedicatedbrand.scrape(eshop);
 
-    console.log(products);
+    console.log(products[0]);
     console.log('done');
     process.exit(0);
   } catch (e) {
@@ -19,3 +19,4 @@ async function sandbox (eshop = 'https://www.dedicatedbrand.com/en/men/news') {
 const [,, eshop] = process.argv;
 
 sandbox(eshop);
+
