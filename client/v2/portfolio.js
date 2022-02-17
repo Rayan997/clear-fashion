@@ -8,7 +8,8 @@ let currentPagination = {};
 // instantiate the selectors
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
-const selectBrands = document.querySelector('#brand-select');
+const selectSort = document.querySelector('#sort-select');
+const selectBrand = document.querySelector('#brand-select');
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 
@@ -58,9 +59,11 @@ const renderProducts = products => {
     .map(product => {
       return `
       <div class="product" id=${product.uuid}>
-        <span>${product.brand}</span>
+        <a style="text-transform: uppercase;"> ${product.brand}</a>
         <a href="${product.link}">${product.name}</a>
-        <span>${product.price}</span>
+        <a> ${product.price}</a>
+        <a>€</a>
+        <i>${product.released}</i>
       </div>
     `;
     })
@@ -71,7 +74,6 @@ const renderProducts = products => {
   sectionProducts.innerHTML = '<h2>Products</h2>';
   sectionProducts.appendChild(fragment);
 };
-
 
 /**
  * Render page selector
@@ -88,39 +90,21 @@ const renderPagination = pagination => {
   selectPage.selectedIndex = currentPage - 1;
 };
 
-
-const renderBrands = pagination => {
-  const { currentPage, pageCount } = pagination;
-  var brands = ['adresse', 'loom', 'aatise', '1083', 'dedicated', 'coteleparis'];
-  const options = Array.from(
-    { 'length': brands.length },
-    (value, index) => `<option value="${brands[index]}">${brands[index]}</option>`
-  ).join('');
-
-  selectBrands.innerHTML = options;
-  selectBrands.selectedIndex = currentPage - 1;
-};
-
-
 /**
  * Render page selector
  * @param  {Object} pagination
  */
-
 const renderIndicators = pagination => {
   const {count} = pagination;
-  spanNbProducts.innerHTML = count;
-  //pagination.products
-};
 
+  spanNbProducts.innerHTML = count;
+};
 
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
-  renderBrands(pagination);
   renderIndicators(pagination);
 };
-
 
 /**
  * Declaration of all Listeners
@@ -128,14 +112,12 @@ const render = (products, pagination) => {
 
 /**
  * Select the number of products to display
+ * @type {[type]}
  */
-let size = 12;
-selectShow.addEventListener('change', async (event) => {
-  size = parseInt(event.target.value)
-  const products = await fetchProducts(currentPagination.currentPage, size);
-
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
+selectShow.addEventListener('change', event => {
+  fetchProducts(1, parseInt(event.target.value))
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -145,29 +127,86 @@ document.addEventListener('DOMContentLoaded', async () => {
   render(currentProducts, currentPagination);
 });
 
-/**
- * Select the page from where the products will be displayed
- */
-
-let page = 1;
-selectPage.addEventListener('change', async (event) => {
-  page = parseInt(event.target.value)
-  const products = await fetchProducts(page, size);
-  
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
+// Feature1
+selectPage.addEventListener('change', event => {  
+  fetchProducts(parseInt(event.target.value),currentPagination.pageSize)
+    .then(setCurrentProducts)
+    .then(() => render(currentProducts, currentPagination));
 });
 
-/**
- * Select the product by brands
-*/
+// Feature2 By brands
+selectBrand.addEventListener('click', async (event) => {
+  if (event.target.value == "none")
+  {
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+    setCurrentProducts(products);
+    render(currentProducts, currentPagination);
+  }
+  else{
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
 
-let brands = 'adresse';
-selectBrands.addEventListener('change', async (event) => {
-  brands = event.target.value
-  const products = await fetchProducts(currentPagination.currentPage, brands);
-  console.log(products)
-   
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
+    products.result = products.result.filter(product => product.brand == event.target.value);
+    setCurrentProducts(products);
+    render(currentProducts, currentPagination);
+  }
+});
+
+
+// Feature5 Sort By Price & Feature6 By Date
+function sort_by_price(items)
+{
+  return items.sort(function(a,b)
+  {
+      return parseFloat(a.price) - parseFloat(b.price);
+  });
+}
+
+function sort_by_date(items)
+{
+  return items.sort(function(a,b)
+  {
+
+    return new Date(a.released) - new Date(b.released);
+  });
+}
+
+selectSort.addEventListener('click', async(event) => {
+  if (event.target.value == "none"){
+    
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+    setCurrentProducts(products);
+    render(currentProducts, currentPagination);
+  }
+  if (event.target.value == "price-desc")
+  {
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+
+    products.result = products.result.filter(product => product.price);
+    setCurrentProducts(products);
+    render(sort_by_price(currentProducts).reverse(), currentPagination);
+  }
+  if (event.target.value == "price-asc")
+  {
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+
+    products.result = products.result.filter(product => product.price);
+    setCurrentProducts(products);
+    render(sort_by_price(currentProducts), currentPagination);
+  }
+  if (event.target.value == "date-asc")
+  {
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+
+    products.result = products.result.filter(product => product.released);
+    setCurrentProducts(products);
+    render(sort_by_date(currentProducts).reverse(), currentPagination);
+  }
+  if (event.target.value == "date-desc")
+  {
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize);
+
+    products.result = products.result.filter(product => product.released);
+    setCurrentProducts(products);
+    render(sort_by_date(currentProducts), currentPagination);
+  }
 });
