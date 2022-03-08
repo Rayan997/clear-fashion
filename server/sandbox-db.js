@@ -12,7 +12,7 @@ async function sandbox () {
     ];
 
     console.log(`🕵️‍♀️  browsing ${pages.length} pages with for...of`);
-
+    // 🎯 TODO: Find all products related to a given brands
     // Way 1 with for of: we scrape page by page
     for (let page of pages) {
       console.log(`🕵️‍♀️  scraping ${page}`);
@@ -62,7 +62,35 @@ async function sandbox () {
     const loomOnly = await db.find({'brand': 'loom'});
 
     console.log(`👕 ${loomOnly.length} total of products found for Loom`);
-    console.log(loomOnly);
+    console.log(loomOnly[0]);
+    for (const elem of loomOnly) {  
+      console.log(elem)
+    }
+
+    // 🎯 TODO: Find all products less than a price
+
+    let price = 80;
+    console.log('💽  Find all products less than a price, here ' + price);
+    const loom_less_price = await db.find({'brand': 'loom', 'price': {"$lt": price}});
+
+    console.log(`👕 ${loom_less_price.length} total of products found for Loom`);
+    //console.log(loom_less_price);
+
+    loom_less_price.forEach(product => {
+      console.log(product)
+    });
+
+    // 🎯 TODO: Find all products sorted by price
+
+    console.log('💽  Find all products less sorted by price');
+    const loom_sorted_by_price = await db.find({'brand': 'loom'}).sort( { 'price': -1 } );
+
+    console.log(`👕 ${loom_less_price.length} total of products found for Loom`);
+    //console.log(loom_less_price);
+
+    loom_sorted_by_price.forEach(product => {
+      console.log(product)
+    });
 
     db.close();
   } catch (e) {
@@ -71,3 +99,7 @@ async function sandbox () {
 }
 
 sandbox();
+
+
+
+
