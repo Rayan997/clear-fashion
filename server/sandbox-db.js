@@ -82,13 +82,29 @@ async function sandbox () {
 
     // 🎯 TODO: Find all products sorted by price
 
-    console.log('💽  Find all products less sorted by price');
-    const loom_sorted_by_price = await db.find({'brand': 'loom'}).sort( { 'price': -1 } );
+    console.log('💽  Find all products sorted by price');
+    //const loom_sorted_by_price = await db.find({'brand': 'loom'}).sort( { 'price': -1 } );
+    //const loom_sorted_by_price = await db.aggregate( [{ $sort : { 'price' : -1 } }])
+    const loom_sorted_by_price = await db.sort({'price': 1});
 
-    console.log(`👕 ${loom_less_price.length} total of products found for Loom`);
+    console.log(`👕 ${loom_sorted_by_price.length} total of products found for sorted by price`);
     //console.log(loom_less_price);
 
-    loom_sorted_by_price.forEach(product => {
+    //loom_sorted_by_price.forEach(product => {
+    //  console.log(product)
+    //});
+
+    // Autre méthode: en utilisant aggregate
+    console.log('💽  Find all products sorted by price with aggregate');
+    const products_sorted_price_2 = await db.aggregate(
+      [
+        {'$sort':{'price': 1}}
+      ]
+    );
+
+    console.log(`👕 ${products_sorted_price_2.length} total of products found`);
+
+    products_sorted_price_2.forEach(product => {
       console.log(product)
     });
 

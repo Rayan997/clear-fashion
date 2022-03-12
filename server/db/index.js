@@ -75,6 +75,32 @@ module.exports.find = async query => {
   }
 };
 
+module.exports.sort = async query => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    const result = await collection.find().sort(query).toArray();
+
+    return result;
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
+module.exports.aggregate = async query => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    const result = await collection.aggregate(query).toArray();
+
+    return result;
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
 /**
  * Close the connection
  */
@@ -85,5 +111,7 @@ module.exports.close = async () => {
     console.error('🚨 MongoClient.close...', error);
   }
 };
+
+
 
 getDB().then(db => console.log(db));
