@@ -23,20 +23,42 @@ app.get('/', (request, response) => {
   response.send({'ack': true});
 });
 
-app.get('/product/search', (request, response) => {
-  response.send({'ack': false});
+
+app.get('/products/search', (request, response) => 
+{
+  let limit = request.query.limit;
+  let brand = request.query.brand;
+  let price = request.query.price;
+  
+  db.aggregate(
+    [
+      {'$match': { '$and': [ {'brand': brand}, {'price': {'$lte':parseInt(price)}}]}},
+      {'$sort': {'price': 1}},
+      {'$limit': parseInt(limit)}
+    ]
+  ).then(elmt => response.send(
+    {'limit': limit, 
+     'found':elmt.length, 
+     'results':elmt
+  }));
+  
+});
+// To test : http://localhost:8092/products/search?limit=5&brand=loom&price=50
+
+
+
+// http://localhost:8092/products/search?limit=5&brand=dedicated&price=29
+
+app.get('/products/:id', (request, response) => 
+{
+  db.getDB();
+  let url = request.url;
+  let elements = url.split('/');
+  let id = elements[elements.length - 1];
+  db.find({'_id': id}).then(elmt => response.send(elmt[0]));
 });
 
-app.get('/product/:id', (request, response) => {
-
-  pages = [
-    'https://www.loom.fr/collections/hauts-homme',
-    'https://www.loom.fr/collections/bas-homme'
-  ];
-
-  const loomOnly = await db.find({'brand': 'loom'});
-  response.send({'ack': false});
-});
+// To test : http://localhost:8092/products/89f2dc10-a334-5e29-a5f5-3773d819c195
 
 app.listen(PORT);
 

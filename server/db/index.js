@@ -75,6 +75,19 @@ module.exports.find = async query => {
   }
 };
 
+module.exports.limit = async query => {
+  try {
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    const result = await collection.find().limit(query).toArray();
+
+    return result;
+  } catch (error) {
+    console.error('🚨 collection.find...', error);
+    return null;
+  }
+};
+
 module.exports.sort = async query => {
   try {
     const db = await getDB();
