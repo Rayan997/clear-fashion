@@ -32,7 +32,8 @@ const setCurrentProducts = ({result, meta}) => {
 const fetchProducts = async (page = 1, size = 12) => {
   try {
     const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+      //`https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+      `https://server-ashy.vercel.app?page=${page}&size=${size}`
     );
     const body = await response.json();
 
@@ -58,13 +59,11 @@ const renderProducts = products => {
   const template = products
     .map(product => {
       return `
-      <div class="product" id=${product.uuid}>
-        <a style="text-transform: uppercase;"> ${product.brand}</a>
-        <a href="${product.link}">${product.name}</a>
-        <a> ${product.price}</a>
-        <a>€</a>
-        <i>${product.released}</i>
-      </div>
+      <div style="font-family:cursive;" class="product" id=${product.uuid}>
+      <span>${product.brand}</span>
+      <a href="${product.link}">${product.name}</a>
+      <span>${product.price}</span>
+    </div>
     `;
     })
     .join('');
